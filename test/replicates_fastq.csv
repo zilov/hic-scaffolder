@@ -1,0 +1,8 @@
+sample,bio_rep,tech_rep,forward,reverse
+mice,1,1,mice1_01_1.fq,mice1_01_2.fq
+mice,1,2,mice1_02_1.fq,mice1_02_2.fq
+mice,1,3,mice1_03_1.fq,mice1_03_2.fq
+human,1,1,human1_01_1.fq,human1_01_2.fq
+human,2,1,human2_01_1.fq,human2_01_2.fq
+human,3,1,human3_01_1.fq,human3_01_2.fq
+human,3,2,human3_02_1.fq,human3_02_2.fq
