@@ -1,0 +1,4 @@
+sample,bio_rep,tech_rep,forward,reverse
+sample,1,1,./sample1_1.fq,./sample1_2.fq
+sample,2,1,./sample2_1.fq,./sample2_2.fq
+sample,2,2,./sample2_1.fq,./sample1_2.fq
