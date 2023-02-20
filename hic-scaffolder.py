@@ -17,10 +17,11 @@ def config_maker(settings, config_file):
     config = f"""
     "outdir" : "{settings["outdir"]}"
     "assembly" : "{settings["assembly_fasta"]}"
-    "forward_read" : "{settings["fr"]}"
-    "reverse_read" : "{settings["rr"]}"
-    "bams": "{settings["bams"]}"
+    "replicates": "{settings["replicates"]}"
+    "forward_hic_read": "{settings["fr"]}"
+    "reverse_hic_read": "{settings["rr"]}"
     "mode" : "{settings["mode"]}"
+    "bam": "{settings["bam"]}"
     "threads" : "{settings["threads"]}"
     """
 
@@ -44,13 +45,12 @@ def main(settings):
 
     #Snakemake
     command = f"""
-    snakemake --snakefile {settings["execution_folder"]}/workflow/Snakefile \
-              --configfile {settings["config_file"]} \
-              --cores {settings["threads"]} \
-              --use-conda
-              --conda-frontend mamba
-              --conda-prefix {settings["execution_folder"]}/.conda_envs
-              {snake_debug}"""
+    snakemake   --snakefile {settings["execution_folder"]}/workflow/Snakefile.smk \
+                --configfile {settings["config_file"]} \
+                --cores {settings["threads"]} \
+                --use-conda \
+                --conda-frontend mamba \
+                {snake_debug}"""
     print(command)
     os.system(command)
 
@@ -58,31 +58,25 @@ def main(settings):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Parrots pipeline - a tool for parrots genome annotation project.')
-    parser.add_argument('-m','--mode', help="mode to use [default = fasta]", 
-                        choices=["align_hic", "merge_tech_reps", "merge_bio_reps", "yahs"], default="align_hic")
-    parser.add_argument('-a','--assembly', help="path to asssembly fasta file", type=argparse.FileType('r'), default="")
-    parser.add_argument('-1','--forward_hix_read', help="path to forward hic read", type=argparse.FileType('r'), default="")
-    parser.add_argument('-2','--reverse_hic_read', help="path to reverse hic read", type=argparse.FileType('r'), default="")
-    parser.add_argument('--bams-tech-rep', 
-                        help='technical replicates bam files to merge, space-separated list',
-                        type=argparse.FileType('r'), nargs='+')
-    parser.add_argument('--bio-rep-bams',
-                        help='technical replicates bam files to merge, space-separated list',
-                        type=argparse.FileType('r'), nargs='+')
-    parser.add_argument('-b', '--bam', help='path to bam pile to run YaHS', type=argparse.FileType('r'), default='')
+    parser.add_argument('-m','--mode', help="mode to use [default = align_hic_pair]", 
+                        choices=["align_hic_pair", "align_hic_replicates", "yahs"], default="align_hic_pair")
+    parser.add_argument('-a','--assembly', help="path to asssembly fasta file", default="", required=True)
+    parser.add_argument('-1','--forward_hic_read', help="path to forward hic read", default="")
+    parser.add_argument('-2','--reverse_hic_read', help="path to reverse hic read", default="")
+    parser.add_argument('-r','--replicates', help="path to replicates CSV file", default="")
+    parser.add_argument('-b', '--bam', help='path to bam pile to run YaHS', default='')
     parser.add_argument('-o','--outdir', help='output directory', required=True)
     parser.add_argument('-t','--threads', help='number of threads [default == 8]', default = "8")
     parser.add_argument('-d','--debug', help='debug mode', action='store_true')
     args = vars(parser.parse_args())
 
+    mode = args["mode"]
     assembly_fasta = os.path.abspath(args["assembly"])
     threads = args["threads"]
     debug = args["debug"]
-    mode = args["mode"]
     forward_hic_read = args["forward_hic_read"]
     reverse_hic_read = args["reverse_hic_read"]
-    bams_tech_rep = args['bams-tech-rep']
-    bams_bio_rep = args['bams-bio-rep']
+    replicates = args["replicates"]
     bam = args['bam']
     outdir = os.path.abspath(args["outdir"])
     
@@ -93,25 +87,20 @@ if __name__ == '__main__':
     # default braker_file for fasta mode
     braker_file = os.path.join(execution_folder,"rules/braker_fasta.smk")
 
-    if mode == "align_hic":
+    if mode == "align_hic_pair":
         if not (forward_hic_read or reverse_hic_read):
-            parser.error("\nalign_hic mode requires -1 {path_to_forward_read} and -2 {path_to_reverse_read}!")
+            parser.error("\nalign_hic_pair mode requires -1 {path_to_forward_read} and -2 {path_to_reverse_read}!")
         else:
             forward_hic_read = os.path.abspath(forward_hic_read)
-            reverse_hic_read = os.path.abspath(reverse_hic_read)    
-    elif mode == "merge_tech_reps":
-        if not bams_tech_rep:
-            parser.error("\nmerge_tech_reps mode requires --bams-tech-rep tech_rep1.bam tech_rep2.bam")
+            reverse_hic_read = os.path.abspath(reverse_hic_read)
+    elif mode == "align_hic_replicates":
+        if not (replicates):
+            parser.error("\nalign_hic_pair mode requires -r {replicates.csv}!")
         else:
-            bams_tech_rep = [os.path.abspath(x) for x in bams_tech_rep]
-    elif mode == "merge_bio_reps":
-        if not bams_bio_rep:
-            parser.error("\nmerge_bio_reps mode requires --bams-tech-rep tech_rep1.bam tech_rep2.bam")
-        else:
-            bams_bio_rep = [os.path.abspath(x) for x in bams_bio_rep]
+            replicates = os.path.abspath(replicates)
     elif mode == "yahs":
         if not (bam or assembly_fasta):
-            parser.error("\nmerge_tech_reps mode requires --bams-tech-rep tech_rep1.bam tech_rep2.bam")
+            parser.error("\nyahs mode requires --bam {sample.bam} -a {assembly.fasta}")
         else:
             bam = os.path.abspath(bam)
             assembly_fasta = os.path.abspath(assembly_fasta)
@@ -121,15 +110,13 @@ if __name__ == '__main__':
         "fr" : forward_hic_read, 
         "rr" : reverse_hic_read,
         "bam" : bam,
-        "bam_bio_rep" : bams_bio_rep,
-        "bam_tech_rep" : bams_tech_rep,
+        "replicates": replicates,
         "outdir" : outdir,
         "threads" : threads,
         "mode" : mode,
         "execution_folder" : execution_folder,
         "debug" : debug,
         "config_file" : config_file,
-        "braker_mode" : braker_file,
     }
     
     config_maker(settings, config_file)

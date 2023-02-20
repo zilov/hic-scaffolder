@@ -3,7 +3,7 @@ channels:
 - conda-forge
 - defaults 
 dependencies:
- - samtools=1.16.1
- - picard=2.27.5
- - bwa=0.7.17
- - ncurses=6.3
+ - samtools
+ - picard
+ - bwa
+ - ncurses
