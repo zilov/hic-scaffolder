@@ -31,7 +31,7 @@ if MODE == 'align_hic_pair':
 
 rule all:
     input:
-        expand('{OUTDIR}/tmp/bams/{sample}.bam', sample=READ_PREFIXES, OUTDIR=OUTDIR)
+        expand('{OUTDIR}/tmp/bams/{sample}_filtered.bam', sample=READ_PREFIXES, OUTDIR=OUTDIR)
 
 rule envs:
     params:
@@ -40,4 +40,14 @@ rule envs:
     
 envs = rules.envs.params
 
+rule scripts:
+    params:
+        filtering = Path("./scripts/mapping_pipeline/filter_five_end.pl").resolve(),
+        merge = Path("./scripts/mapping_pipeline/two_read_bam_combiner.pl").resolve(),
+        stats = Path("./scripts/mapping_pipeline/get_stats.pl").resolve(),
+    
+scripts = rules.scripts.params
+
 include: "./rules/map_reads.smk"
+
+include: "./rules/filter_bams.smk"
