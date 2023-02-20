@@ -31,7 +31,7 @@ if MODE == 'align_hic_pair':
 
 rule all:
     input:
-        f'{OUTDIR}/tmp/bams/{PREFIX}_merged.bam'
+       f'{OUTDIR}/tmp/bams/{PREFIX}_with_readgroup.bam'
 
 rule envs:
     params:
@@ -53,3 +53,5 @@ include: "./rules/map_reads.smk"
 include: "./rules/filter_bams.smk"
 
 include: "./rules/merge_bams.smk"
+
+include: "./rules/add_read_group.smk"
