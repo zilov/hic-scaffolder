@@ -31,7 +31,7 @@ if MODE == 'align_hic_pair':
 
 rule all:
     input:
-       f'{OUTDIR}/tmp/bams/{PREFIX}_with_readgroup.bam'
+       f'{OUTDIR}/tmp/bams/{PREFIX}_marked_duplicates.bam'
 
 rule envs:
     params:
@@ -55,3 +55,5 @@ include: "./rules/filter_bams.smk"
 include: "./rules/merge_bams.smk"
 
 include: "./rules/add_read_group.smk"
+
+include: "./rules/mark_duplicates.smk"
