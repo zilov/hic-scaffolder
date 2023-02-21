@@ -31,7 +31,7 @@ if MODE == 'align_hic_pair':
 
 rule all:
     input:
-       f'{OUTDIR}/tmp/bams/{PREFIX}_marked_duplicates.bam'
+        f"{OUTDIR}/yahs/{PREFIX}_scaffolds_final.fa"
 
 rule envs:
     params:
@@ -57,3 +57,7 @@ include: "./rules/merge_bams.smk"
 include: "./rules/add_read_group.smk"
 
 include: "./rules/mark_duplicates.smk"
+
+BAM_TO_SCAFFOLD = rules.mark_duplicates.output.bam_with_duplicate
+
+include: "./rules/yahs.smk"
