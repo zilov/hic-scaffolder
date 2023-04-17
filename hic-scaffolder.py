@@ -12,27 +12,16 @@ from inspect import getsourcefile
 from datetime import datetime
 import string
 import random
+import yaml
 
 def config_maker(settings, config_file):
-    config = f"""
-    "outdir" : "{settings["outdir"]}"
-    "assembly" : "{settings["assembly_fasta"]}"
-    "replicates": "{settings["replicates"]}"
-    "forward_hic_read": "{settings["fr"]}"
-    "reverse_hic_read": "{settings["rr"]}"
-    "mode" : "{settings["mode"]}"
-    "bam": "{settings["bam"]}"
-    "threads" : "{settings["threads"]}"
-    """
-
+    
     if not os.path.exists(os.path.dirname(config_file)):
         os.mkdir(os.path.dirname(config_file))
 
-
-    with open(config_file, "w") as fw:
-        fw.write(config)
+    with open(config_file, "w") as f:
+        yaml.dump(settings, f)
         print(f"CONFIG IS CREATED! {config_file}")
-      
 
 def main(settings):
     ''' Function description.
@@ -81,6 +70,7 @@ if __name__ == '__main__':
     outdir = os.path.abspath(args["outdir"])
     
     execution_folder = os.path.dirname(os.path.abspath(getsourcefile(lambda: 0)))
+    print(execution_folder)
     execution_time = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
     config_random_letters = "".join([random.choice(string.ascii_letters) for n in range(3)])
     config_file = os.path.join(execution_folder, f"config/config_{config_random_letters}{execution_time}.yaml")
@@ -107,8 +97,8 @@ if __name__ == '__main__':
         
     settings = {
         "assembly_fasta" : assembly_fasta,
-        "fr" : forward_hic_read, 
-        "rr" : reverse_hic_read,
+        "forward_hic_read" : forward_hic_read, 
+        "reverse_hic_read" : reverse_hic_read,
         "bam" : bam,
         "replicates": replicates,
         "outdir" : outdir,
