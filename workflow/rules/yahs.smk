@@ -11,7 +11,9 @@ rule yahs_scaffold:
     params:
         prefix = PREFIX,
         yahs_dir = directory(f"{OUTDIR}/yahs")
-    shell: "yahs {input.assembly} {input.bam} -o {params.yahs_dir}/{params.prefix}"
+    shell: "yahs {input.assembly} {input.bam} -q 40 \
+    -r 1000,2000,5000,10000,20000,50000,100000,200000,500000,1000000,2000000,5000000,10000000,20000000,50000000,100000000,200000000,500000000 \
+    -o {params.yahs_dir}/{params.prefix}"
 
 rule scaffold_index:
     input:
