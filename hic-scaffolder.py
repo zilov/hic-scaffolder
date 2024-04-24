@@ -46,7 +46,7 @@ def main(settings):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='Parrots pipeline - a tool for parrots genome annotation project.')
+    parser = argparse.ArgumentParser(description='hic-scaffolder - a pipleine to align HiC reads to genome, scaffold it with YaHS adn get ready to curation HiC maps')
     parser.add_argument('-m','--mode', help="mode to use [default = assembly_to_hic_map]", 
                         choices=["assembly_to_hic_map", "reviewed_to_fasta"], default="assembly_to_hic_map")
     parser.add_argument('-s','--scaffolder', help="scaffolder to use [default = yahs]", 
